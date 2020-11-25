@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Text,
   Image,
@@ -9,13 +9,16 @@ import {
   HStack,
   Heading,
   IconButton,
-} from '@chakra-ui/react';
-import { ChevronLeftIcon, AddIcon, CheckIcon } from '@chakra-ui/icons';
-import { useParams, useHistory } from 'react-router-dom';
-import useMovie from '../hooks/useMovie';
-import { buildImageUrl, imageFallback } from '../connectors/tmdb';
-import { getYear, STATUS } from '../utils';
-import WatchlistButton from '../components/WatchlistButton';
+} from "@chakra-ui/react";
+import { ChevronLeftIcon, AddIcon, CheckIcon } from "@chakra-ui/icons";
+import { useParams, useHistory } from "react-router-dom";
+import useMovie from "../hooks/useMovie";
+import { buildImageUrl, imageFallback } from "../connectors/tmdb";
+import { getYear, STATUS } from "../utils";
+import WatchlistButton from "../components/WatchlistButton";
+import HistoryButton from "../components/HistoryButton";
+import { Rating } from "@material-ui/lab";
+import { MovieGenre } from "./style";
 
 export default function Movie() {
   const { movieId } = useParams();
@@ -44,6 +47,12 @@ export default function Movie() {
     );
   }
 
+  const renderMovieGenre = () => {
+    return movie.genres.map(({ name }) => {
+      return <MovieGenre>{name}</MovieGenre>;
+    });
+  };
+
   return (
     <Container p={3} maxW="80em">
       <HStack mb={3} justify="space-between">
@@ -56,20 +65,31 @@ export default function Movie() {
           onClick={history.goBack}
         />
         <HStack>
-          <WatchlistButton movie={movie} status={updateStatus} update={updateMovie} />
-          <IconButton
-            aria-label={isHistoryActive ? 'Remove from history' : 'Mark as watched'}
+          <WatchlistButton
+            movie={movie}
+            status={updateStatus}
+            update={updateMovie}
+          />
+          <HistoryButton
+            movie={movie}
+            status={updateStatus}
+            update={updateMovie}
+          />
+          {/* <IconButton
+            aria-label={
+              isHistoryActive ? "Remove from history" : "Mark as watched"
+            }
             icon={isHistoryActive ? <CheckIcon /> : <AddIcon />}
             colorScheme="teal"
-            variant={isHistoryActive ? 'solid' : 'outline'}
-            onClick={() => setHistoryActive(a => !a)}
-          />
+            variant={isHistoryActive ? "solid" : "outline"}
+            onClick={() => setHistoryActive((a) => !a)}
+          /> */}
         </HStack>
       </HStack>
       <HStack spacing={3} align="flex-start">
         <Box>
           <Image
-            src={buildImageUrl(movie.poster_path, 'w300')}
+            src={buildImageUrl(movie.poster_path, "w300")}
             alt="Poster"
             w="35vw"
             maxW={300}
@@ -78,10 +98,44 @@ export default function Movie() {
         </Box>
         <Box w="100%">
           <HStack justify="space-between">
-            <Heading as="h2">{movie.title}</Heading>
-            <Text as="span" color="GrayText">
-              {getYear(movie.release_date)}
-            </Text>
+            <Heading
+              as="h2"
+              style={{ display: "flex", alignItems: "center", width: "100%" }}
+            >
+              {movie.title} ({getYear(movie.release_date)})
+              <Rating
+                name="average"
+                value={movie.vote_average / 2}
+                disabled
+                style={{ marginLeft: "1rem" }}
+              />
+              <Text
+                as="span"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  marginLeft: ".5rem",
+                  fontSize: "1rem",
+                  fontWeight: 400,
+                }}
+              >
+                ({movie.vote_count})
+              </Text>
+              <Text
+                as="span"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  marginLeft: ".5rem",
+                  flex: 1,
+                  fontSize: "1rem",
+                  fontWeight: 400,
+                  justifyContent: "flex-end",
+                }}
+              >
+                {renderMovieGenre()}
+              </Text>
+            </Heading>
           </HStack>
           <Text>{movie.overview}</Text>
         </Box>

@@ -1,7 +1,7 @@
-const { Progress } = require('@chakra-ui/react');
-const express = require('express');
-const db = require('./db');
-const { sleep } = require('./utils');
+const { Progress } = require("@chakra-ui/react");
+const express = require("express");
+const db = require("./db");
+const { sleep } = require("./utils");
 
 const router = express.Router();
 
@@ -11,7 +11,7 @@ const router = express.Router();
 // update one = put('movies/:movieId') || patch('movies/:movieId')
 // delete one = delete('movies/:movieId')
 
-router.get('/movies/:movieId', async (req, res) => {
+router.get("/movies/:movieId", async (req, res) => {
   const { movieId } = req.params;
   const movie = await db.movies.findOne({ movieId });
 
@@ -23,24 +23,35 @@ router.get('/movies/:movieId', async (req, res) => {
   }
 });
 
-router.put('/movies/:movieId', async (req, res) => {
+router.put("/movies/:movieId", async (req, res) => {
   const { movieId } = req.params;
   const movieData = req.body;
   delete movieData._id; // Mongo don't let us update this field
   const movie = await db.movies.findOneAndUpdate(
     { movieId },
     { $set: movieData },
-    { returnOriginal: false, upsert: true },
+    { returnOriginal: false, upsert: true }
   );
 
   await sleep();
   res.send(movie.value);
 });
 
-router.get('/watchlist', async (req, res) => {
+router.get("/watchlist", async (req, res) => {
   const movies = await db.movies
-    .find({ watchlist: 'listed' })
-    .sort(['release_date', -1])
+    .find({ watchlist: "listed" })
+    .sort(["release_date", -1])
+    .limit(100)
+    .toArray();
+
+  await sleep();
+  res.send(movies);
+});
+
+router.get("/historylist", async (req, res) => {
+  const movies = await db.movies
+    .find({ historylist: "watched" })
+    .sort(["release_date", -1])
     .limit(100)
     .toArray();
 
